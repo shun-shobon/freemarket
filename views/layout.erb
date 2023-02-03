@@ -11,6 +11,9 @@
   <body>
     <header>
       ユーザー名: <%= @user.nil? ? 'ゲスト' : @user[:name] %>
+      <form action="/logout" method="POST">
+        <input type="submit" value="ログアウト">
+      </form>
     </header>
     <%= yield %>
   </body>

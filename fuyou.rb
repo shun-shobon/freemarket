@@ -17,30 +17,36 @@ set :sessions,
 ActiveRecord::Base.configurations = YAML.load_file('database.yml')
 ActiveRecord::Base.establish_connection :development
 
+# ユーザー
 class User < ActiveRecord::Base
   self.table_name = 'users'
 end
 
+# 出品された商品
 class Item < ActiveRecord::Base
   self.table_name = 'items'
 end
 
 helpers do
+  # ログインしているかどうかを判定
   def login?
     !@user.nil?
   end
 
+  # ログインしていない場合はログイン画面にリダイレクト
   def enforce_login!
     redirect '/login' unless login?
   end
 
+  # ログインしている場合はホーム画面にリダイレクト
   def enforce_not_login!
     redirect '/' if login?
   end
 end
 
 before do
-  @user = User.select(:id, :name, :email, :is_admin).find_by(id: session[:user_id])
+  # ログインしている場合はユーザー情報を取得
+  @user ||= User.select(:id, :name, :email, :is_admin).find_by(id: session[:user_id]) if session[:user_id]
 end
 
 get '/' do
@@ -84,6 +90,12 @@ def validate_login(email, password)
   return [false, 'パスワードを入力してください'] if password.nil? || password.empty?
 
   [true, nil]
+end
+
+post '/logout' do
+  session.clear
+
+  redirect '/'
 end
 
 get '/register' do
