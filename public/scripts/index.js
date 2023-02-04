@@ -14,7 +14,7 @@ const Item = ({ item, userId }) => {
         >
       </div>
       <div>
-        <a href=${`/item/${item.id}`}
+        <a href=${`/items/${item.id}`}
           >${item.user_id === userId ? "応募状況確認" : "応募する"}</a
         >
       </div>

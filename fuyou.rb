@@ -88,6 +88,22 @@ get '/items' do
   body res.to_json
 end
 
+get '/items/:id' do
+  id = params[:id].to_i
+
+  # 出品された商品を取得
+  item = Item
+         .joins(:user)
+         .select('items.*, users.name as user_name')
+         .find_by(id:)
+  halt 404 if item.nil?
+
+  @data = {
+    item:
+  }
+  erb :item
+end
+
 get '/login' do
   enforce_not_login!
 
