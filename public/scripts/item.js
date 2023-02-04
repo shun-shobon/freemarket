@@ -21,7 +21,7 @@ const App = () => {
   return html`
     <main>
       <h1>${item.name}</h1>
-      ${item.iamge && html`<img src=${`/uploads/${item.image}`} />`}
+      ${item.image && html`<img src=${`/uploads/${item.image}`} />`}
       <p>${item.description}</p>
       <form action="/bid" method="POST" ref=${formRef} onSubmit=${handleSubmit}>
         <input type="hidden" name="id" value=${item.id} />

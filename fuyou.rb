@@ -34,6 +34,18 @@ class Item < ActiveRecord::Base
 
   # 出品者を持つ
   belongs_to :user, foreign_key: :user_id
+  # 入札を持つ
+  has_many :bids, foreign_key: :item_id, dependent: :destroy
+end
+
+# 入札
+class Bid < ActiveRecord::Base
+  self.table_name = 'bids'
+
+  # 出品された商品を持つ
+  belongs_to :item, foreign_key: :item_id
+  # 入札者を持つ
+  belongs_to :user, foreign_key: :user_id
 end
 
 helpers do
@@ -102,6 +114,25 @@ get '/items/:id' do
     item:
   }
   erb :item
+end
+
+post '/bid' do
+  enforce_login!
+
+  id = params[:id].to_i
+  # 出品された商品を取得
+  item = Item.find_by(id:)
+  # エラー処理
+  halt 404 if item.nil?
+  halt 400, '自分の出品した商品には入札できません' if item.user_id == @user.id
+  halt 400, '応募期間が終了しています' if !item.deadline.nil? && item.deadline < Time.now
+
+  Bid.create!(
+    item_id: id,
+    user_id: @user.id
+  )
+
+  redirect '/'
 end
 
 get '/login' do
@@ -250,8 +281,7 @@ post '/new' do
     name:,
     description:,
     deadline: deadline&.iso8601,
-    user_id: @user.id,
-    created_at: Time.now.iso8601
+    user_id: @user.id
   )
 
   # 画像があれば保存

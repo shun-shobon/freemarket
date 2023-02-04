@@ -18,5 +18,15 @@ CREATE TABLE IF NOT EXISTS items (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS bids (
+  id INTEGER PRIMARY KEY,
+  item_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+
+  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 INSERT INTO users (name, email, hashed_password, is_admin) VALUES
   ('shun', 'shun@example.com', '$argon2id$v=19$m=65536,t=2,p=1$BND9TQxzCxEG/l6CjZKcPQ$mHwrKZEMNA6t6qKAh+vXbylEPOWaJOuTarkdXmkgang', 0);
