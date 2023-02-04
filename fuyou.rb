@@ -62,6 +62,32 @@ get '/' do
   erb :index
 end
 
+get '/items' do
+  page = params[:page].to_i
+  page = 1 if page < 1
+  # 1ページあたりの表示件数
+  per_page = 5
+
+  count = Item.count
+  max_page = (count / per_page.to_f).ceil
+  page = max_page if page > max_page
+
+  # 出品された商品を取得
+  items = Item
+          .joins(:user)
+          .select('items.*, users.name as user_name')
+          .order(created_at: :desc)
+          .offset((page - 1) * per_page)
+          .limit(per_page)
+
+  res = {
+    items:,
+    page:,
+    max_page:
+  }
+  body res.to_json
+end
+
 get '/login' do
   enforce_not_login!
 
@@ -188,7 +214,7 @@ post '/new' do
   # 期限をパース
   deadline = begin
     Time.parse(params[:deadline])
-  rescue ArgumentError
+  rescue StandardError
     # パースに失敗したらnilを返す
     nil
   end

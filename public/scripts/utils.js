@@ -1,5 +1,15 @@
 import { useId, useState } from "./deps.js";
 
+// ユーザー情報を取得するカスタムフック
+export const useUser = () => {
+  return window.USER_DATA;
+};
+
+// データを取得するカスタムフック
+export const useData = () => {
+  return window.DATA;
+};
+
 // 入力フォームのプロパティを生成するカスタムフック
 export const useInput = (initialValue, name) => {
   const id = useId();
