@@ -6,6 +6,8 @@ gem 'activerecord'
 gem 'sqlite3'
 gem 'dotenv'
 gem 'argon2'
+gem 'mimemagic'
+gem 'marcel'
 
 group :development, :test do
   gem 'rubocop', require: false

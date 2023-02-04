@@ -6,6 +6,9 @@ require 'time'
 require 'dotenv'
 require 'securerandom'
 require 'argon2'
+require 'mimemagic'
+require 'marcel'
+require 'digest'
 
 Dotenv.load
 
@@ -20,11 +23,17 @@ ActiveRecord::Base.establish_connection :development
 # ユーザー
 class User < ActiveRecord::Base
   self.table_name = 'users'
+
+  # 出品した商品を持つ
+  has_many :items, foreign_key: :user_id, dependent: :nullify
 end
 
 # 出品された商品
 class Item < ActiveRecord::Base
   self.table_name = 'items'
+
+  # 出品者を持つ
+  belongs_to :user, foreign_key: :user_id
 end
 
 helpers do
@@ -74,7 +83,9 @@ post '/login' do
     return erb :login
   end
 
+  # メールアドレスからユーザーを取得
   user = User.find_by(email:)
+  # ユーザーが存在しないか、パスワードが間違っていたらエラーを表示してログイン画面に戻る
   if user.nil? || !Argon2::Password.verify_password(password, user.hashed_password)
     @err = 'メールアドレスかパスワードが間違っています'
     status 401
@@ -85,6 +96,7 @@ post '/login' do
   redirect '/'
 end
 
+# ログインのバリデーション
 def validate_login(email, password)
   return [false, 'メールアドレスを入力してください'] if email.nil? || email.empty?
   return [false, 'パスワードを入力してください'] if password.nil? || password.empty?
@@ -147,6 +159,7 @@ post '/register' do
   redirect '/'
 end
 
+# ユーザー登録のバリデーション
 def validate_register(name, email, password)
   return [false, '名前を入力してください'] if name.nil? || name.empty?
   return [false, 'メールアドレスを入力してください'] if email.nil? || email.empty?
@@ -155,3 +168,78 @@ def validate_register(name, email, password)
   [true, nil]
 end
 
+get '/new' do
+  enforce_login!
+
+  erb :new
+end
+
+post '/new' do
+  enforce_login!
+
+  name = params[:name]
+  description = params[:description]
+  type = params[:type]
+  # 画像をバイナリで取得
+  image = params[:image]&.[](:tempfile)&.read
+  # 期限をパース
+  deadline = begin
+    Time.parse(params[:deadline])
+  rescue ArgumentError
+    # パースに失敗したらnilを返す
+    nil
+  end
+
+  # バリデーション
+  ok, err = validate_new(name, description, image, type, deadline)
+  # バリデーションに失敗したらエラーを表示して新規作成画面に戻る
+  unless ok
+    p err
+    status 400
+    return erb :new
+  end
+
+  # 商品を登録
+  item = Item.create!(
+    name:,
+    description:,
+    deadline: deadline&.iso8601,
+    user_id: @user.id,
+    created_at: Time.now.iso8601
+  )
+
+  # 画像があれば保存
+  if image
+    # 画像の拡張子を取得
+    ext = MimeMagic.new(Marcel::MimeType.for(image)).extensions[0]
+    # 画像のハッシュ値を取得
+    hash = Digest::SHA256.hexdigest(image)
+    # ファイル名を決定
+    filename = "#{item.id}_#{hash}.#{ext}"
+    # 画像を保存
+    File.open("public/uploads/#{filename}", 'wb') do |f|
+      f.write(image)
+    end
+
+    # 画像のパスを保存
+    item.image = filename
+    item.save!
+  end
+
+  # 商品のデータをビューに渡す
+  @data = item
+  # 成功画面を表示
+  erb :success
+end
+
+# 出品登録のバリデーション
+def validate_new(name, description, image, type, deadline)
+  return [false, '商品名を入力してください'] if name.nil? || name.empty?
+  return [false, '商品説明を入力してください'] if description.nil? || description.empty?
+  return [false, '画像を選択してください'] if !image.nil? && !MimeMagic.new(Marcel::MimeType.for(image)).image?
+  return [false, '移譲先を選択してください'] unless %w[race lottery].include?(type)
+  return [false, '期限を入力してください'] if type == 'lottery' && deadline.nil?
+  return [false, '期限は未来を指定してください'] if type == 'lottery' && deadline < Time.now
+
+  [true, nil]
+end

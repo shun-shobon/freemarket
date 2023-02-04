@@ -10,7 +10,13 @@ CREATE TABLE IF NOT EXISTS items (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
+  image TEXT NULL,
   deadline TEXT NULL,
-  has_image BOOLEAN,
-  password TEXT NULL
+  user_id INTEGER NULL,
+  created_at TEXT NOT NULL,
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
+INSERT INTO users (name, email, hashed_password, is_admin) VALUES
+  ('shun', 'shun@example.com', '$argon2id$v=19$m=65536,t=2,p=1$BND9TQxzCxEG/l6CjZKcPQ$mHwrKZEMNA6t6qKAh+vXbylEPOWaJOuTarkdXmkgang', 0);

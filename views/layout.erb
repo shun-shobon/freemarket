@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/styles/utils.css">
     <script type="text/javascript">
       window.USER_DATA = <%= @user.to_json %>;
+      window.DATA = <%= @data.to_json %>;
     </script>
   </head>
   <body>
@@ -14,6 +15,12 @@
       <form action="/logout" method="POST">
         <input type="submit" value="ログアウト">
       </form>
+      <ul>
+        <li><a href="/">ホーム</a></li>
+        <li><a href="/login">ログイン</a></li>
+        <li><a href="/register">ユーザー登録</a></li>
+        <li><a href="/new">出品登録</a></li>
+      </ul>
     </header>
     <%= yield %>
   </body>
