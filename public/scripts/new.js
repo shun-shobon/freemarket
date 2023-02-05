@@ -1,5 +1,6 @@
 import { html, render, Fragment, useState, useRef } from "./deps.js";
 import { useInput, useRadio } from "./utils.js";
+import { Modal } from "./components.js";
 
 const App = () => {
   // 各種フォームのプロパティ
@@ -18,7 +19,7 @@ const App = () => {
 
   // フォームと確認ダイアログの参照
   const formRef = useRef(null);
-  const dialogRef = useRef(null);
+  const [show, setShow] = useState(false);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -42,15 +43,8 @@ const App = () => {
     // フォームの送信をキャンセル
     event.preventDefault();
     // 確認ダイアログを表示
-    dialogRef.current.showModal();
+    setShow(true);
   };
-
-  // OKボタン押下時のハンドラ
-  // フォームの送信を実行
-  const handleOk = () => formRef.current.submit();
-  // キャンセルボタン押下時のハンドラ
-  // 確認ダイアログを閉じる
-  const handleCancel = () => dialogRef.current.close();
 
   return html`
     <div>
@@ -103,7 +97,7 @@ const App = () => {
         <input type="submit" value="確認" />
       </form>
 
-      <dialog ref=${dialogRef}>
+      <${Modal} show=${show}>
         <header>出品確認</header>
         <p>下記の内容で出品します。よろしいですか？</p>
         <dl>
@@ -129,10 +123,10 @@ const App = () => {
           `}
         </dl>
         <menu>
-          <button onClick=${handleOk}>OK</button>
-          <button onClick=${handleCancel}>キャンセル</button>
+          <button onClick=${() => formRef.current.submit()}>OK</button>
+          <button onClick=${() => setShow(false)}>キャンセル</button>
         </menu>
-      </dialog>
+      <//>
     </div>
   `;
 };

@@ -26,7 +26,7 @@ class User < ActiveRecord::Base
   self.table_name = 'users'
 
   # 出品した商品を持つ
-  has_many :items, foreign_key: :user_id, dependent: :nullify
+  has_many :items, foreign_key: :user_id, dependent: :destroy
 end
 
 # 出品された商品
@@ -80,6 +80,7 @@ get '/items' do
   page = 1 if page < 1
   # 1ページあたりの表示件数
   per_page = 5
+  user_id = params[:user_id]&.to_i
 
   count = Item.count
   max_page = (count / per_page.to_f).ceil
@@ -87,10 +88,11 @@ get '/items' do
 
   # 出品された商品を取得
   items = Item
-          .left_outer_joins(:user) # 出品者の情報を取得するために左外部結合
+          .joins(:user) # 出品者の情報を取得するために結合
           .left_outer_joins(:bids) # 応募者の情報を取得するために左外部結合
           .group(:id) # 応募者の件数を取得するためにグループ化
           .select('items.*, users.name as user_name, count(bids.id) as bid_count') # 応募者の件数を取得するためにcountを使用
+          .yield_self { |q| user_id.nil? ? q : q.where(user_id:) } # ユーザーIDが指定されている場合は絞り込む
           .order(created_at: :desc) # 新しい順に並べる
           .offset((page - 1) * per_page) # ページ数に応じてオフセットを設定
           .limit(per_page) # 1ページあたりの表示件数
@@ -123,6 +125,12 @@ get '/items/:id' do
     bids:
   }
   erb :item
+end
+
+get '/my/items' do
+  enforce_login!
+
+  erb :my_items
 end
 
 post '/bid' do
@@ -335,14 +343,17 @@ def validate_new(name, description, image, type, deadline)
   [true, nil]
 end
 
-# 賞品の削除
+# 商品の削除
 post '/delete' do
   enforce_login!
 
   id = params[:id]
+  p params
 
   # 商品を削除
   item = Item.find_by(id:)
+  p item
+  p @user
   if item&.user_id == @user.id
     File.delete("public/uploads/#{item.image}") if item.image
     item.destroy

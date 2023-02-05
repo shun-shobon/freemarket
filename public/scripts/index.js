@@ -1,7 +1,8 @@
 import { html, render, useState, useEffect } from "./deps.js";
-import { useUser } from "./utils.js";
+import { useItems, useUser } from "./utils.js";
+import { Item, PageNav } from "./components.js";
 
-const Item = ({ item, userId }) => {
+const AppItem = ({ item, userId }) => {
   const handleClick = () => {
     window.location.href = `/items/${item.id}`;
   };
@@ -21,74 +22,44 @@ const Item = ({ item, userId }) => {
       : "応募する";
 
   return html`
-    <section>
-      ${item.image && html`<img src=${`/uploads/${item.image}`} />`}
-      <h2>${item.name}</h2>
-      <div>出品者: ${item.user_name}</div>
-      <div>
-        出品日時:
-        <time datetime=${item.created_at}
-          >${new Date(item.created_at).toLocaleString()}</time
-        >
-      </div>
-      <div>
-        <button onClick=${handleClick} disabled=${disabled}>
-          ${buttonMessage}
-        </button>
-      </div>
-    </section>
+    <${Item} item=${item} userId=${userId}>
+      <button onClick=${handleClick} disabled=${disabled}>
+        ${buttonMessage}
+      </button>
+    <//>
   `;
 };
 
 const App = () => {
   const user = useUser();
 
-  const [page, setPage] = useState(1);
-  const [maxPage, setMaxPage] = useState(1);
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    const url = new URL("/items", window.location.origin);
-    url.searchParams.set("page", page);
-
-    (async () => {
-      const res = await fetch(url);
-      const { items, page, max_page } = await res.json();
-      setItems(items);
-      setPage(page);
-      setMaxPage(max_page);
-    })();
-  }, [page]);
+  const {
+    items,
+    page,
+    setPage,
+    hasPrevPage,
+    hasNextPage,
+    prevPage,
+    nextPage,
+    maxPage,
+  } = useItems();
 
   return html`
     <main>
       <h1>ホーム</h1>
       ${items.map(
         (item) =>
-          html`<${Item} item=${item} userId=${user?.id} key=${item.id} />`
+          html`<${AppItem} item=${item} userId=${user?.id} key=${item.id} />`
       )}
-      <nav>
-        <button
-          disabled=${page <= 1}
-          onClick=${() => setPage((prev) => prev - 1)}
-        >
-          «
-        </button>
-        ${new Array(maxPage).fill().map((_, i) => {
-          const p = i + 1;
-          return html`
-            <button disabled=${p === page} onClick=${() => setPage(p)}>
-              ${p}
-            </button>
-          `;
-        })}
-        <button
-          disabled=${maxPage <= page}
-          onClick=${() => setPage((prev) => prev + 1)}
-        >
-          »
-        </button>
-      </nav>
+      <${PageNav}
+        page=${page}
+        maxPage=${maxPage}
+        setPage=${setPage}
+        hasPrevPage=${hasPrevPage}
+        hasNextPage=${hasNextPage}
+        prevPage=${prevPage}
+        nextPage=${nextPage}
+      />
     </main>
   `;
 };

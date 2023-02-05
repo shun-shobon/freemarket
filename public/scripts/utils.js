@@ -1,4 +1,4 @@
-import { useId, useState } from "./deps.js";
+import { useId, useState, useEffect } from "./deps.js";
 
 // ユーザー情報を取得するカスタムフック
 export const useUser = () => {
@@ -32,4 +32,43 @@ export const useRadio = (selections, name) => {
   });
 
   return { value: radioValue, radios };
+};
+
+export const useItems = (user_id) => {
+  const [items, setItems] = useState([]);
+  const [updated, setUpdated] = useState(false);
+  const [page, setPage] = useState(1);
+  const [maxPage, setMaxPage] = useState(1);
+
+  const hasPrevPage = page > 1;
+  const hasNextPage = page < maxPage;
+  const prevPage = () => hasPrevPage && setPage((page) => page - 1);
+  const nextPage = () => hasNextPage && setPage((page) => page + 1);
+  const update = () => setUpdated((updated) => !updated);
+
+  useEffect(() => {
+    const url = new URL("/items", window.location.origin);
+    url.searchParams.set("page", page);
+    if (user_id) url.searchParams.set("user_id", user_id);
+
+    (async () => {
+      const res = await fetch(url);
+      const { items, page, max_page } = await res.json();
+      setItems(items);
+      setPage(page);
+      setMaxPage(max_page);
+    })();
+  }, [page, updated]);
+
+  return {
+    items,
+    page,
+    setPage,
+    hasPrevPage,
+    hasNextPage,
+    prevPage,
+    nextPage,
+    maxPage,
+    update,
+  };
 };

@@ -1,20 +1,15 @@
-import { html, render, useRef, Fragment } from "./deps.js";
+import { html, render, useRef, useState, Fragment } from "./deps.js";
 import { useData, useUser } from "./utils.js";
+import { Modal } from "./components.js";
 
 // 応募フォーム
 const BidFrom = ({ item }) => {
   const formRef = useRef(null);
-  const dialogRef = useRef(null);
+  const [show, setShow] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    dialogRef.current.showModal();
-  };
-  const handleOk = () => {
-    formRef.current.submit();
-  };
-  const handleCancel = () => {
-    dialogRef.current.close();
+    setShow(true);
   };
 
   return html`
@@ -23,14 +18,14 @@ const BidFrom = ({ item }) => {
         <input type="hidden" name="id" value=${item.id} />
         <input type="submit" value="応募する" />
       </form>
-      <dialog ref=${dialogRef}>
+      <${Modal} show=${show}>
         <header>応募確認</header>
         <p>応募しますか？</p>
         <menu>
-          <button onClick=${handleOk}>応募</button>
-          <button onClick=${handleCancel}>キャンセル</button>
+          <button onClick=${() => formRef.current.submit()}>応募</button>
+          <button onClick=${() => setShow(false)}>キャンセル</button>
         </menu>
-      </dialog>
+      <//>
     <//>
   `;
 };
@@ -64,17 +59,11 @@ const BidList = ({ bids }) => {
 
 const DeleteItem = ({ itemId }) => {
   const formRef = useRef(null);
-  const dialogRef = useRef(null);
+  const [show, setShow] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    dialogRef.current.showModal();
-  };
-  const handleOk = () => {
-    formRef.current.submit();
-  };
-  const handleCancel = () => {
-    dialogRef.current.close();
+    setShow(true);
   };
 
   return html`
@@ -88,14 +77,14 @@ const DeleteItem = ({ itemId }) => {
         <input type="hidden" name="id" value=${itemId} />
         <input type="submit" value="削除" />
       </form>
-      <dialog ref=${dialogRef}>
+      <${Modal} show=${show}>
         <header>削除確認</header>
         <p>削除しますか？</p>
         <menu>
-          <button onClick=${() => handleOk()}>削除</button>
-          <button onClick=${() => handleCancel()}>キャンセル</button>
+          <button onClick=${() => formRef.current.submit()}>削除</button>
+          <button onClick=${() => setShow(false)}>キャンセル</button>
         </menu>
-      </dialog>
+      <//>
     <//>
   `;
 };

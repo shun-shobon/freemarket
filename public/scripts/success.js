@@ -1,10 +1,11 @@
 import { html, render, Fragment } from "./deps.js";
+import { useData } from "./utils.js";
 
 const App = () => {
-  const item = window.DATA;
+  const item = useData();
 
   return html`
-    <linkdiv>
+    <div>
       <h1>出品登録</h1>
       <p>登録が完了しました。</p>
 
@@ -18,33 +19,29 @@ const App = () => {
         <dt>商品説明</dt>
         <dd>${item.description}</dd>
 
-        ${
-          item.image &&
-          html`
-            <${Fragment}>
-              <dt>画像</dt>
-              <dd><img src=${`/uploads/${item.image}`} /></dd>
-            <//>
-          `
-        }
-        ${
-          item.deadline
-            ? html`
-                <${Fragment}>
-                  <dt>譲渡先</dt>
-                  <dd>抽選</dd>
+        ${item.image &&
+        html`
+          <${Fragment}>
+            <dt>画像</dt>
+            <dd><img src=${`/uploads/${item.image}`} /></dd>
+          <//>
+        `}
+        ${item.deadline
+          ? html`
+              <${Fragment}>
+                <dt>譲渡先</dt>
+                <dd>抽選</dd>
 
-                  <dt>期限</dt>
-                  <dd>${new Date(item.deadline).toLocaleString()}</dd>
-                <//>
-              `
-            : html`
-                <${Fragment}>
-                  <dt>譲渡先</dt>
-                  <dd>早いもの勝ち</dd>
-                <//>
-              `
-        }
+                <dt>期限</dt>
+                <dd>${new Date(item.deadline).toLocaleString()}</dd>
+              <//>
+            `
+          : html`
+              <${Fragment}>
+                <dt>譲渡先</dt>
+                <dd>早いもの勝ち</dd>
+              <//>
+            `}
       </dl>
 
       <a href="/">ホームへ</a>
