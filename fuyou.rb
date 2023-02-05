@@ -19,6 +19,7 @@ set :sessions,
 
 ActiveRecord::Base.configurations = YAML.load_file('database.yml')
 ActiveRecord::Base.establish_connection :development
+ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 # ユーザー
 class User < ActiveRecord::Base
@@ -86,11 +87,13 @@ get '/items' do
 
   # 出品された商品を取得
   items = Item
-          .joins(:user)
-          .select('items.*, users.name as user_name')
-          .order(created_at: :desc)
-          .offset((page - 1) * per_page)
-          .limit(per_page)
+          .left_outer_joins(:user) # 出品者の情報を取得するために左外部結合
+          .left_outer_joins(:bids) # 応募者の情報を取得するために左外部結合
+          .group(:id) # 応募者の件数を取得するためにグループ化
+          .select('items.*, users.name as user_name, count(bids.id) as bid_count') # 応募者の件数を取得するためにcountを使用
+          .order(created_at: :desc) # 新しい順に並べる
+          .offset((page - 1) * per_page) # ページ数に応じてオフセットを設定
+          .limit(per_page) # 1ページあたりの表示件数
 
   res = {
     items:,
@@ -110,6 +113,7 @@ get '/items/:id' do
          .find_by(id:)
   halt 404 if item.nil?
 
+  # 出品者の場合は応募者の情報も取得
   bids = if item.user_id == @user&.id
            Bid.joins(:user).select('bids.*, users.name as user_name').where(item_id: id).order(created_at: :desc)
          end
@@ -129,8 +133,13 @@ post '/bid' do
   item = Item.find_by(id:)
   # エラー処理
   halt 404 if item.nil?
-  halt 400, '自分の出品した商品には入札できません' if item.user_id == @user.id
+  halt 400, '自分の出品した商品には応募できません' if item.user_id == @user.id
   halt 400, '応募期間が終了しています' if !item.deadline.nil? && item.deadline < Time.now
+  # 早いもの勝ちの場合はすでに応募があるかどうかを確認
+  if item.deadline.nil?
+    bid_count = Bid.where(item_id: id).count
+    halt 400, 'すでに締め切られています' if bid_count.positive?
+  end
 
   Bid.create!(
     item_id: id,

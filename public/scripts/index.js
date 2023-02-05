@@ -2,6 +2,24 @@ import { html, render, useState, useEffect } from "./deps.js";
 import { useUser } from "./utils.js";
 
 const Item = ({ item, userId }) => {
+  const handleClick = () => {
+    window.location.href = `/items/${item.id}`;
+  };
+
+  const disabled =
+    item.user_id === userId
+      ? false
+      : item.deadline
+      ? new Date(item.deadline) < new Date()
+      : item.bid_count > 0;
+
+  const buttonMessage =
+    item.user_id === userId
+      ? "応募状況確認"
+      : disabled
+      ? "応募終了"
+      : "応募する";
+
   return html`
     <section>
       ${item.image && html`<img src=${`/uploads/${item.image}`} />`}
@@ -14,9 +32,9 @@ const Item = ({ item, userId }) => {
         >
       </div>
       <div>
-        <a href=${`/items/${item.id}`}
-          >${item.user_id === userId ? "応募状況確認" : "応募する"}</a
-        >
+        <button onClick=${handleClick} disabled=${disabled}>
+          ${buttonMessage}
+        </button>
       </div>
     </section>
   `;
