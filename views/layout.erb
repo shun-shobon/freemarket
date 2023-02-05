@@ -7,6 +7,7 @@
     <script type="text/javascript">
       window.USER_DATA = <%= @user.to_json %>;
       window.DATA = <%= @data.to_json %>;
+      window.ERR = <%= @err.to_json %>;
     </script>
     <script src="/scripts/header.js" type="module" defer></script>
   </head>

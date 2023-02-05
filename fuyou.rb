@@ -10,12 +10,10 @@ require 'mimemagic'
 require 'marcel'
 require 'digest'
 
-Dotenv.load
-
-# set :environment, :production
+set :environment, :production
 set :sessions,
     expire_after: 60 * 60 * 24 * 7,
-    secret: ENV['SESSION_SECRET']
+    secret: 'de7715df7b826ffca1d9bb0d4af49f79f73bbf1f060b6d3e1fd3398db60dae98'
 
 ActiveRecord::Base.configurations = YAML.load_file('database.yml')
 ActiveRecord::Base.establish_connection :development
@@ -173,7 +171,6 @@ post '/login' do
   ok, err = validate_login(email, password)
   # バリデーションに失敗したらエラーを表示してログイン画面に戻る
   unless ok
-    # FIXME: エラーの渡し方を変更する
     @err = err
     status 401
     return erb :login
@@ -183,7 +180,6 @@ post '/login' do
   user = User.find_by(email:)
   # ユーザーが存在しないか、パスワードが間違っていたらエラーを表示してログイン画面に戻る
   if user.nil? || !Argon2::Password.verify_password(password, user.hashed_password)
-    # FIXME: エラーの渡し方を変更する
     @err = 'メールアドレスかパスワードが間違っています'
     status 401
     return erb :login
@@ -225,7 +221,6 @@ post '/register' do
   ok, err = validate_register(name, email, password)
   # バリデーションに失敗したらエラーを表示して登録画面に戻る
   unless ok
-    # FIXME: エラーの渡し方を変更する
     @err = err
     status 400
     return erb :register
@@ -233,7 +228,6 @@ post '/register' do
 
   # メールアドレスが既に登録されているかチェック
   if User.find_by(email:)
-    # FIXME: エラーの渡し方を変更する
     @err = 'そのメールアドレスは既に登録されています'
     status 400
     return erb :register
@@ -293,8 +287,7 @@ post '/new' do
   ok, err = validate_new(name, description, image, type, deadline)
   # バリデーションに失敗したらエラーを表示して新規作成画面に戻る
   unless ok
-    # FIXME: エラーの渡し方を変更する
-    p err
+    @err = err
     status 400
     return erb :new
   end
