@@ -110,8 +110,13 @@ get '/items/:id' do
          .find_by(id:)
   halt 404 if item.nil?
 
+  bids = if item.user_id == @user&.id
+           Bid.joins(:user).select('bids.*, users.name as user_name').where(item_id: id).order(created_at: :desc)
+         end
+
   @data = {
-    item:
+    item:,
+    bids:
   }
   erb :item
 end
