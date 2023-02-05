@@ -29,4 +29,4 @@ CREATE TABLE IF NOT EXISTS bids (
 );
 
 INSERT INTO users (name, email, hashed_password, is_admin) VALUES
-  ('shun', 'shun@example.com', '$argon2id$v=19$m=65536,t=2,p=1$BND9TQxzCxEG/l6CjZKcPQ$mHwrKZEMNA6t6qKAh+vXbylEPOWaJOuTarkdXmkgang', 0);
+  ('admin', 'admin@email.local', '$argon2id$v=19$m=65536,t=2,p=1$0oWKekdb7ec8FCMfnMrkIg$OgmICvF7JE0m2oUJ1iuysScMu+AUnm4UVXKRAT5sNss', 1);

@@ -47,17 +47,19 @@ const App = () => {
   };
 
   return html`
-    <main>
+    <main class="container vstack">
       <h1>管理者ページ(全出品一覧)</h1>
-      ${items.map(
-        (item) =>
-          html`<${MyItem}
-            item=${item}
-            userId=${user?.id}
-            key=${item.id}
-            onDelete=${handleDeleteClick}
-          />`
-      )}
+      <ul class="item-container">
+        ${items.map(
+          (item) =>
+            html`<${MyItem}
+              item=${item}
+              userId=${user?.id}
+              key=${item.id}
+              onDelete=${handleDeleteClick}
+            />`
+        )}
+      </ul>
       <${PageNav}
         page=${page}
         maxPage=${maxPage}
