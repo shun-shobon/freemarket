@@ -343,7 +343,10 @@ post '/delete' do
 
   # 商品を削除
   item = Item.find_by(id:)
-  item.destroy if item&.user_id == @user.id
+  if item&.user_id == @user.id
+    File.delete("public/uploads/#{item.image}") if item.image
+    item.destroy
+  end
 
   # ホーム画面にリダイレクト
   redirect '/'
