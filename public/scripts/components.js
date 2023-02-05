@@ -2,18 +2,38 @@ import { html, useEffect, useRef } from "./deps.js";
 
 export const Item = ({ item, userId, children }) => {
   return html`
-    <section>
-      ${item.image && html`<img src=${`/uploads/${item.image}`} />`}
-      <h2>${item.name}</h2>
-      <div>出品者: ${item.user_name}</div>
-      <div>
-        出品日時:
-        <time datetime=${item.created_at}
-          >${new Date(item.created_at).toLocaleString()}</time
-        >
-      </div>
+    <li class="item">
+      ${item.image
+        ? html`<img class="item__image" src=${`/uploads/${item.image}`} />`
+        : html`<div class="item__image" />`}
+      <h2 class="item__name">${item.name}</h2>
+      <dl class="item__attributes">
+        <div>
+          <dt>出品者</dt>
+          <dd>${item.user_name}</dd>
+        </div>
+        <div>
+          <dt>出品日時</dt>
+          <dd>
+            <time datetime=${item.created_at}>
+              ${new Date(item.created_at).toLocaleString()}
+            </time>
+          </dd>
+        </div>
+        ${item.deadline &&
+        html`
+          <div>
+            <dt>応募締切</dt>
+            <dd>
+              <time datetime=${item.deadline}>
+                ${new Date(item.deadline).toLocaleString()}
+              </time>
+            </dd>
+          </div>
+        `}
+      </dl>
       <div>${children}</div>
-    </section>
+    </li>
   `;
 };
 
@@ -40,7 +60,7 @@ export const PageNav = ({
   prevPage,
 }) => {
   return html`
-    <nav>
+    <nav class="page-nav">
       <button disabled=${!hasPrevPage} onClick=${prevPage}>«</button>
       ${new Array(maxPage).fill().map((_, i) => {
         const p = i + 1;

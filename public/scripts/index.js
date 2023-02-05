@@ -45,12 +45,14 @@ const App = () => {
   } = useItems();
 
   return html`
-    <main>
+    <main class="container vstack">
       <h1>ホーム</h1>
-      ${items.map(
-        (item) =>
-          html`<${AppItem} item=${item} userId=${user?.id} key=${item.id} />`
-      )}
+      <ul class="item-container">
+        ${items.map(
+          (item) =>
+            html`<${AppItem} item=${item} userId=${user?.id} key=${item.id} />`
+        )}
+      </ul>
       <${PageNav}
         page=${page}
         maxPage=${maxPage}

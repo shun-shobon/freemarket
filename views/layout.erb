@@ -1,27 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <title>不用品譲渡システム</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <title>Freemarket</title>
+    <link rel="stylesheet" href="/styles/reset.css">
+    <link rel="stylesheet" href="/styles/main.css">
     <script type="text/javascript">
       window.USER_DATA = <%= @user.to_json %>;
       window.DATA = <%= @data.to_json %>;
     </script>
+    <script src="/scripts/header.js" type="module" defer></script>
   </head>
   <body>
-    <header>
-      ユーザー名: <%= @user.nil? ? 'ゲスト' : @user[:name] %>
-      <form action="/logout" method="POST">
-        <input type="submit" value="ログアウト">
-      </form>
-      <ul>
-        <li><a href="/">ホーム</a></li>
-        <li><a href="/login">ログイン</a></li>
-        <li><a href="/register">ユーザー登録</a></li>
-        <li><a href="/new">出品登録</a></li>
-        <li><a href="/my/items">出品一覧</a></li>
-      </ul>
-    </header>
+    <header id="header"></header>
     <%= yield %>
   </body>
 </html>

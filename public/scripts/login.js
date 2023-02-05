@@ -7,18 +7,20 @@ const App = () => {
   const passwordProps = useInput("", "password");
 
   return html`
-    <div>
+    <main class="container vstack">
       <h1>ログイン</h1>
-      <form action="/login" method="POST">
-        <label for=${emailProps.id}>メールアドレス</label>
-        <input type="email" required ...${emailProps} />
-
-        <label for=${passwordProps.id}>パスワード</label>
-        <input type="password" required ...${passwordProps} />
-
+      <form class="vstack" action="/login" method="POST">
+        <div>
+          <label for=${emailProps.id}>メールアドレス</label>
+          <input type="email" required ...${emailProps} />
+        </div>
+        <div>
+          <label for=${passwordProps.id}>パスワード</label>
+          <input type="password" required ...${passwordProps} />
+        </div>
         <input type="submit" value="ログイン" />
       </form>
-    </div>
+    </main>
   `;
 };
 

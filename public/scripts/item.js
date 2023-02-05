@@ -95,17 +95,25 @@ const App = () => {
   const user = useUser();
 
   return html`
-    <main>
-      <h1>${item.name}</h1>
-      ${item.image && html`<img src=${`/uploads/${item.image}`} />`}
-      <p>${item.description}</p>
-      ${
-        // 応募一覧があれば表示、なければ応募フォームを表示
-        bids
-          ? html`<${BidList} bids=${bids} />`
-          : html`<${BidFrom} item=${item} />`
-      }
-      ${item.user_id === user.id && html`<${DeleteItem} itemId=${item.id} />`}
+    <main class="container two-column">
+      ${item.image
+        ? html`<img class="item-page__image" src=${`/uploads/${item.image}`} />`
+        : html`<div class="item-page__image" />`}
+      <div class="item-page__attributes">
+        <h1 class="item-page__attributes__name">${item.name}</h1>
+        <h2>商品の説明</h2>
+        <p class="item-page__attributes__description">${item.description}</p>
+        ${
+          // 応募一覧があれば表示、なければ応募フォームを表示
+          bids
+            ? html`<${BidList} bids=${bids} />`
+            : html`<${BidFrom} item=${item} />`
+        }
+        ${
+          // ログインしていて、かつ自分の投稿であれば削除ボタンを表示
+          item.user_id === user?.id && html`<${DeleteItem} itemId=${item.id} />`
+        }
+      </div>
     </main>
   `;
 };
