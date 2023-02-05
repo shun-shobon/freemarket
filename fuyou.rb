@@ -216,6 +216,7 @@ post '/register' do
 
   # メールアドレスが既に登録されているかチェック
   if User.find_by(email:)
+    # FIXME: エラーの渡し方を変更する
     @err = 'そのメールアドレスは既に登録されています'
     status 400
     return erb :register
@@ -323,4 +324,18 @@ def validate_new(name, description, image, type, deadline)
   return [false, '期限は未来を指定してください'] if type == 'lottery' && deadline < Time.now
 
   [true, nil]
+end
+
+# 賞品の削除
+post '/delete' do
+  enforce_login!
+
+  id = params[:id]
+
+  # 商品を削除
+  item = Item.find_by(id:)
+  item.destroy if item&.user_id == @user.id
+
+  # ホーム画面にリダイレクト
+  redirect '/'
 end

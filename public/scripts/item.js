@@ -1,5 +1,5 @@
 import { html, render, useRef, Fragment } from "./deps.js";
-import { useData } from "./utils.js";
+import { useData, useUser } from "./utils.js";
 
 // 応募フォーム
 const BidFrom = ({ item }) => {
@@ -62,9 +62,48 @@ const BidList = ({ bids }) => {
   `;
 };
 
+const DeleteItem = ({ itemId }) => {
+  const formRef = useRef(null);
+  const dialogRef = useRef(null);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    dialogRef.current.showModal();
+  };
+  const handleOk = () => {
+    formRef.current.submit();
+  };
+  const handleCancel = () => {
+    dialogRef.current.close();
+  };
+
+  return html`
+    <${Fragment}>
+      <form
+        action="/delete"
+        method="POST"
+        ref=${formRef}
+        onSubmit="${handleSubmit}"
+      >
+        <input type="hidden" name="id" value=${itemId} />
+        <input type="submit" value="削除" />
+      </form>
+      <dialog ref=${dialogRef}>
+        <header>削除確認</header>
+        <p>削除しますか？</p>
+        <menu>
+          <button onClick=${() => handleOk()}>削除</button>
+          <button onClick=${() => handleCancel()}>キャンセル</button>
+        </menu>
+      </dialog>
+    <//>
+  `;
+};
+
 const App = () => {
   // 賞品情報と応募一覧を取得
   const { item, bids } = useData();
+  const user = useUser();
 
   return html`
     <main>
@@ -77,6 +116,7 @@ const App = () => {
           ? html`<${BidList} bids=${bids} />`
           : html`<${BidFrom} item=${item} />`
       }
+      ${item.user_id === user.id && html`<${DeleteItem} itemId=${item.id} />`}
     </main>
   `;
 };
