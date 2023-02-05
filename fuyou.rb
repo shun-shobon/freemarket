@@ -348,17 +348,22 @@ post '/delete' do
   enforce_login!
 
   id = params[:id]
-  p params
 
   # 商品を削除
   item = Item.find_by(id:)
-  p item
-  p @user
-  if item&.user_id == @user.id
+  # 商品が存在し、ユーザーが管理者または商品の出品者であれば削除
+  if @user.is_admin || item&.user_id == @user.id
     File.delete("public/uploads/#{item.image}") if item.image
     item.destroy
   end
 
   # ホーム画面にリダイレクト
   redirect '/'
+end
+
+get '/admin' do
+  enforce_login!
+  halt 403 unless @user.is_admin
+
+  erb :admin
 end
