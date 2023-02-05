@@ -10,13 +10,17 @@ require 'mimemagic'
 require 'marcel'
 require 'digest'
 
+# 本番環境に設定
 set :environment, :production
+# セッションを有効化
 set :sessions,
     expire_after: 60 * 60 * 24 * 7,
     secret: 'de7715df7b826ffca1d9bb0d4af49f79f73bbf1f060b6d3e1fd3398db60dae98'
 
+# データベースの設定
 ActiveRecord::Base.configurations = YAML.load_file('database.yml')
 ActiveRecord::Base.establish_connection :development
+# ログを標準出力に出力
 ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 # ユーザー

@@ -12,3 +12,8 @@ reset:
 	rm -rf public/uploads
 	mkdir public/uploads
 	touch public/uploads/.gitkeep
+
+compress:
+	mkdir -p 19426
+	cp -r public views database.yml dbinit.sq3 fuyou.rb Gemfile Gemfile.lock 19426/
+	zip -r 19426.zip 19426/
